@@ -220,7 +220,9 @@ fn try_match_overload(
     Some(substitute_type(&scoped_result, substitutions))
 }
 
-/// A type whose values have one runtime kind, so two different ones never meet in one parameter.
+/// Outer types for which an incompatible type-parameter binding fails the overload.
+/// Other types (type values, messages, abstract types) still widen the binding to Dyn,
+/// a known gap relative to cel-go rather than intended behavior.
 fn is_value_type(t: &CelType) -> bool {
     matches!(
         t,
@@ -257,9 +259,8 @@ fn is_assignable(
                 }
                 return true;
             }
-            // One type parameter, two different value types: no overload, as in cel-go.
-            // `"s" == 3` and `3 in ["a"]` are check errors, not a runtime false. Types with no
-            // single runtime kind (type values, messages, abstract types) still widen to Dyn.
+            // No overload, as in cel-go's `isValidTypeSubstitution`: `"s" == 3` is a check error.
+            // Dyn, boxing, and nullable arguments were already accepted as compatible above.
             if is_value_type(&bound) && is_value_type(arg) {
                 return false;
             }
