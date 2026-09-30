@@ -1603,4 +1603,29 @@ mod tests {
         let result = check(&ast, &standard_variables(), &standard_functions(), "");
         assert_eq!(result.get_type(ast.id), Some(&CelType::Dyn));
     }
+
+    #[test]
+    fn test_one_type_param_two_value_types_is_no_overload() {
+        for source in [
+            r#""s" == 3"#,
+            r#"3 in ["a"]"#,
+            r#"[1] == ["a"]"#,
+            "true ? 1 : \"a\"",
+            "timestamp(0) == duration('1s')",
+        ] {
+            let result = check_expr(source);
+            assert!(!result.is_ok(), "{source} should not type-check");
+        }
+        let result = check_expr_with_var(r#"x == "x""#, "x", CelType::wrapper(CelType::Int));
+        assert!(!result.is_ok(), "int? == string should not type-check");
+    }
+
+    #[test]
+    fn test_dyn_and_null_still_meet_value_types() {
+        for source in ["dyn(1) == 1", r#"dyn("a") in [1, 2]"#] {
+            assert!(check_expr(source).is_ok(), "{source} should type-check");
+        }
+        let result = check_expr_with_var("x == null", "x", CelType::wrapper(CelType::Int));
+        assert!(result.is_ok());
+    }
 }

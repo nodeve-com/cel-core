@@ -220,6 +220,25 @@ fn try_match_overload(
     Some(substitute_type(&scoped_result, substitutions))
 }
 
+/// A type whose values have one runtime kind, so two different ones never meet in one parameter.
+fn is_value_type(t: &CelType) -> bool {
+    matches!(
+        t,
+        CelType::Bool
+            | CelType::Int
+            | CelType::UInt
+            | CelType::Double
+            | CelType::String
+            | CelType::Bytes
+            | CelType::Timestamp
+            | CelType::Duration
+            | CelType::Null
+            | CelType::Wrapper(_)
+            | CelType::List(_)
+            | CelType::Map(_, _)
+    )
+}
+
 /// Check if an argument type is assignable to a parameter type.
 fn is_assignable(
     arg: &CelType,
@@ -238,7 +257,12 @@ fn is_assignable(
                 }
                 return true;
             }
-            // Incompatible types widen the param to Dyn
+            // One type parameter, two different value types: no overload, as in cel-go.
+            // `"s" == 3` and `3 in ["a"]` are check errors, not a runtime false. Types with no
+            // single runtime kind (type values, messages, abstract types) still widen to Dyn.
+            if is_value_type(&bound) && is_value_type(arg) {
+                return false;
+            }
             substitutions.insert(name.clone(), CelType::Dyn);
             return true;
         } else {
