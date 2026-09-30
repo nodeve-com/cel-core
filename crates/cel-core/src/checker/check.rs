@@ -1594,4 +1594,13 @@ mod tests {
             CheckErrorKind::NoMatchingOverload { function, .. } if function == "_+_"
         )));
     }
+
+    #[test]
+    fn test_dyn_binding_stays_dyn() {
+        let ast = parse("true ? dyn(1) : 1")
+            .ast
+            .expect("parse should succeed");
+        let result = check(&ast, &standard_variables(), &standard_functions(), "");
+        assert_eq!(result.get_type(ast.id), Some(&CelType::Dyn));
+    }
 }
