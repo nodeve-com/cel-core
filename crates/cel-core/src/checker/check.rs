@@ -1620,6 +1620,10 @@ mod tests {
         assert_eq!(check_optional_int_x("[?x, 1]"), CelType::list(CelType::Int));
         assert_eq!(check_optional_int_x("[?x][0]"), CelType::Int);
         assert_eq!(check_optional_int_x("[?x, 1][0] + 1"), CelType::Int);
+        assert_eq!(
+            check_optional_int_x("[?x].map(e, e + 1)"),
+            CelType::list(CelType::Int)
+        );
     }
 
     #[test]
