@@ -301,6 +301,15 @@ impl<'a> Checker<'a> {
         let mut elem_types = Vec::new();
         for elem in elements {
             let elem_type = self.check_expr(&elem.expr);
+            // Optional elements have type optional<T>, but the list element type is T
+            let elem_type = if elem.optional {
+                match elem_type {
+                    CelType::Optional(inner) => (*inner).clone(),
+                    other => other,
+                }
+            } else {
+                elem_type
+            };
             elem_types.push(elem_type);
         }
 
@@ -1593,5 +1602,32 @@ mod tests {
             &e.kind,
             CheckErrorKind::NoMatchingOverload { function, .. } if function == "_+_"
         )));
+    }
+
+    /// Check `source` with `x` declared as `optional(int)`; return the root type.
+    fn check_optional_int_x(source: &str) -> CelType {
+        let ast = parse(source).ast.expect("parse should succeed");
+        let mut variables = standard_variables();
+        variables.insert("x".to_string(), CelType::optional(CelType::Int));
+        let result = check(&ast, &variables, &standard_functions(), "");
+        assert!(result.is_ok(), "{source}: {:?}", result.errors);
+        result.get_type(ast.id).cloned().expect("root type")
+    }
+
+    #[test]
+    fn test_optional_list_element_unwraps() {
+        assert_eq!(check_optional_int_x("[?x]"), CelType::list(CelType::Int));
+        assert_eq!(check_optional_int_x("[?x, 1]"), CelType::list(CelType::Int));
+        assert_eq!(check_optional_int_x("[?x][0]"), CelType::Int);
+        assert_eq!(check_optional_int_x("[?x, 1][0] + 1"), CelType::Int);
+    }
+
+    #[test]
+    fn test_optional_map_entry_unwraps() {
+        assert_eq!(
+            check_optional_int_x("{?'k': x}"),
+            CelType::map(CelType::String, CelType::Int)
+        );
+        assert_eq!(check_optional_int_x("{?'k': x, 'j': 1}['k']"), CelType::Int);
     }
 }
