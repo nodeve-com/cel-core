@@ -493,8 +493,9 @@ impl<'a> Checker<'a> {
                 // Fall back to Dyn if no registry available
                 CelType::Dyn
             }
-            CelType::Dyn | CelType::TypeVar(_) => {
-                // For Dyn and type variables, we can't verify field existence statically
+            CelType::Dyn | CelType::TypeVar(_) | CelType::TypeParam(_) => {
+                // For Dyn and type variables or parameters left unbound, as indexing a dyn
+                // leaves one, we can't verify field existence statically
                 CelType::Dyn
             }
             CelType::Map(_, value_type) => {
@@ -1031,7 +1032,7 @@ impl<'a> Checker<'a> {
                     }
                 }
             }
-            CelType::Map(_, _) | CelType::Dyn | CelType::TypeVar(_) => {
+            CelType::Map(_, _) | CelType::Dyn | CelType::TypeVar(_) | CelType::TypeParam(_) => {
                 // Maps, Dyn, and type variables allow any key — no validation
             }
             CelType::Error => {
@@ -1490,6 +1491,15 @@ mod tests {
 
         // Should have a reference for the operator
         assert!(refs.iter().any(|r| r.name == "_+_"));
+    }
+
+    #[test]
+    fn test_select_on_an_indexed_dyn() {
+        let resolver = MockProtoResolver::new();
+        for source in ["x[0].y", "x[0].y.z", "x['a'].y", "has(x[0].y)"] {
+            let result = check_expr_with_var_and_resolver(source, "x", CelType::Dyn, &resolver);
+            assert!(result.is_ok(), "{source}: {:?}", result.errors);
+        }
     }
 
     #[test]
