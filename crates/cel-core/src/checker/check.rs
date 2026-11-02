@@ -430,6 +430,17 @@ impl<'a> Checker<'a> {
             ));
         }
 
+        // A value beside null is nullable, whatever its type.
+        let (then_type, else_type) = match (then_type, else_type) {
+            (CelType::Null, other) if nullable_alone(&other) => {
+                (CelType::Null, CelType::wrapper(other))
+            }
+            (other, CelType::Null) if nullable_alone(&other) => {
+                (CelType::wrapper(other), CelType::Null)
+            }
+            pair => pair,
+        };
+
         // Use ternary operator for type resolution
         self.resolve_function_call("_?_:_", None, &[CelType::Bool, then_type, else_type], expr)
     }
@@ -464,9 +475,12 @@ impl<'a> Checker<'a> {
         // Otherwise, it's a field access
         let obj_type = self.check_expr(obj);
 
-        // Unwrap optional types for field access
+        // Unwrap optional types for field access, and a nullable message, which fails as null
         let (inner_type, was_optional) = match &obj_type {
             CelType::Optional(inner) => ((**inner).clone(), true),
+            CelType::Wrapper(inner) if matches!(**inner, CelType::Message(_)) => {
+                ((**inner).clone(), false)
+            }
             other => (other.clone(), false),
         };
 
@@ -1147,6 +1161,23 @@ pub fn check_with_type_resolver_and_abbreviations(
 }
 
 /// Check if a type contains any TypeVar (for comprehension type refinement).
+/// Whether a ternary's other branch being null makes this type a nullable one: a value CEL gives
+/// no null of its own, not a dyn or type still open.
+fn nullable_alone(t: &CelType) -> bool {
+    matches!(
+        t,
+        CelType::Bool
+            | CelType::Int
+            | CelType::UInt
+            | CelType::Double
+            | CelType::String
+            | CelType::Bytes
+            | CelType::Timestamp
+            | CelType::Duration
+            | CelType::Message(_)
+    )
+}
+
 fn contains_type_var_checker(ty: &CelType) -> bool {
     match ty {
         CelType::TypeVar(_) => true,
@@ -1491,6 +1522,15 @@ mod tests {
 
         // Should have a reference for the operator
         assert!(refs.iter().any(|r| r.name == "_+_"));
+    }
+
+    #[test]
+    fn test_a_ternary_beside_null_is_nullable() {
+        let resolver = MockProtoResolver::new();
+        for source in ["x ? 'a' : null", "x ? null : 1"] {
+            let result = check_expr_with_var_and_resolver(source, "x", CelType::Bool, &resolver);
+            assert!(result.is_ok(), "{source}: {:?}", result.errors);
+        }
     }
 
     #[test]
