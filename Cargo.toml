@@ -6,7 +6,7 @@ resolver = "2"
 version = "0.5.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ponix-dev/cel-core"
+repository = "https://github.com/nodeve-com/cel-core"
 authors = ["ponix-dev"]
 
 [workspace.dependencies]
@@ -14,5 +14,5 @@ logos = "0.14"
 prost = "0.14"
 prost-reflect = "0.16"
 regex = "1.10"
-cel-core = { path = "crates/cel-core", version = "0.5.1" }
+cel-core = { package = "cel-core-nodeve", path = "crates/cel-core", version = "0.5.1" }
 cel-core-proto = { path = "crates/cel-core-proto", version = "0.5.1" }

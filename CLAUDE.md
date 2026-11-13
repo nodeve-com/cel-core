@@ -17,7 +17,7 @@ cargo build
 cargo build --release
 
 # Build specific crate
-cargo build -p cel-core
+cargo build -p cel-core-nodeve
 ```
 
 ### Testing

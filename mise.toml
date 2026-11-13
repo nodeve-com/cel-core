@@ -64,8 +64,8 @@ run = "cog bump --auto --dry-run"
 description = "Publish crates to crates.io in dependency order"
 depends = ["test"]
 run = """
-echo "Publishing cel-core..."
-cargo publish -p cel-core || echo "cel-core already published, skipping..."
+echo "Publishing cel-core-nodeve..."
+cargo publish -p cel-core-nodeve || echo "cel-core-nodeve already published, skipping..."
 
 echo "Waiting for crates.io to index..."
 sleep 10

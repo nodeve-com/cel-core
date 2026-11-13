@@ -90,7 +90,7 @@ jobs:
         with:
           ref: v${{ needs.bump.outputs.version }}
       - uses: ./.github/actions/setup
-      - run: cargo publish -p cel-core
+      - run: cargo publish -p cel-core-nodeve
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
       - name: Wait for crates.io indexing

@@ -1,5 +1,14 @@
 # CEL-Core
 
+> This is `cel-core-nodeve`, a fork of [`cel-core`](https://github.com/ponix-dev/cel-core) 0.5.1. It carries checker fixes and a chrono build without default features that are open as pull requests upstream, and retires once they merge. The library is still named `cel_core`, so depend on it under the upstream name:
+>
+> ```toml
+> [dependencies]
+> cel-core = { package = "cel-core-nodeve", version = "0.5.1" }
+> ```
+>
+> One fix changes what the checker accepts: an expression that binds one type parameter to two value types, such as `"s" == 3`, is now rejected.
+
 A spec-complete [Common Expression Language](https://github.com/google/cel-spec) (CEL) implementation written in rust.
 
 CEL-Core provides the full CEL pipeline — parsing, type checking, and evaluation — with wire compatibility to [cel-go](https://github.com/google/cel-go) and [cel-cpp](https://github.com/google/cel-cpp) through protobuf AST conversion.

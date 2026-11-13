@@ -1,11 +1,15 @@
 [package]
-name = "cel-core"
+name = "cel-core-nodeve"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
 authors.workspace = true
-description = "High-level API for the Common Expression Language (CEL)"
+description = "A fork of cel-core, the Common Expression Language (CEL) in Rust, carrying fixes not yet merged upstream"
+readme = "../../README.md"
+
+[lib]
+name = "cel_core"
 
 [dependencies]
 chrono = { version = "0.4", default-features = false, features = ["std"] }
