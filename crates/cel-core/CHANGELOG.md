@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.2](https://github.com/nodeve-com/cel-core/compare/cel-core-nodeve-v0.5.1...cel-core-nodeve-v0.5.2) - 2026-11-14
+
+### Other
+
+- *(cel-core-nodeve)* release v0.5.1 ([#2](https://github.com/nodeve-com/cel-core/pull/2))
+
 ## [0.5.1](https://github.com/nodeve-com/cel-core/releases/tag/cel-core-nodeve-v0.5.1) - 2026-11-14
 
 ### Added
