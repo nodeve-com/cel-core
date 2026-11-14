@@ -1,0 +1,5 @@
+# Only cel-core-nodeve goes to crates.io: cel-core-proto's name is upstream's there, and
+# cel-core-conformance is publish = false.
+[[package]]
+name = "cel-core-proto"
+release = false

@@ -14,6 +14,8 @@ pub struct LexError {
 }
 
 /// CEL tokens.
+// Logos takes one `#[regex]` per pattern, and patterns of one token often share a callback or a priority.
+#[allow(clippy::duplicated_attributes)]
 #[derive(Logos, Debug, Clone, PartialEq)]
 #[logos(skip r"[ \t\n\r\f]+")]
 #[logos(skip r"//[^\n]*")]
